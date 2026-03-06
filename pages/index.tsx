@@ -21,7 +21,7 @@ export default function Home() {
     <div
       className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-start justify-center bg-zinc-50 font-sans dark:bg-black py-20 px-4`}
     >
-      <div className="flex flex-col w-full max-w-4xl gap-4">
+      <div className="flex flex-col w-full max-w-5xl gap-4">
         <Topbar />
         <main className="flex w-full flex-col items-center sm:items-start gap-12 bg-white dark:bg-zinc-800 p-8 shadow-sm">
         <header className="w-full border-b border-border pb-6 flex flex-col gap-1">

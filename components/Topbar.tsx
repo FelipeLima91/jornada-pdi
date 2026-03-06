@@ -69,7 +69,17 @@ export function Topbar() {
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      setIsDark(document.documentElement.classList.contains("dark"));
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark") {
+        document.documentElement.classList.add("dark");
+        setIsDark(true);
+      } else if (saved === "light") {
+        document.documentElement.classList.remove("dark");
+        setIsDark(false);
+      } else {
+        // Sem preferência salva, lê o estado atual
+        setIsDark(document.documentElement.classList.contains("dark"));
+      }
     });
     return () => cancelAnimationFrame(frame);
   }, []);
@@ -110,8 +120,17 @@ export function Topbar() {
 
   const exportPDF = () => {
     setPopoverOpen(false);
-    // Usa o próprio layout da página + CSS @media print
-    window.print();
+    // Força modo claro para impressão
+    const html = document.documentElement;
+    const wasDark = html.classList.contains("dark");
+    if (wasDark) html.classList.remove("dark");
+
+    // Pequeno delay para o browser aplicar o repaint antes de imprimir
+    requestAnimationFrame(() => {
+      window.print();
+      // Restaura o tema escuro se estava ativo
+      if (wasDark) html.classList.add("dark");
+    });
   };
 
   return (
