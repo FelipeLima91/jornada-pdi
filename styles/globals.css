@@ -137,3 +137,53 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* ===== Regras de Impressão (PDF) ===== */
+@media print {
+  @page {
+    size: portrait;
+    margin: 15mm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Esconde o Topbar (botões de exportar e tema) */
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  /* Esconde inputs, textareas e botões interativos (+, editar, remover, confirmar, cancelar) */
+  input,
+  textarea,
+  button:not([data-print-show]) {
+    display: none !important;
+  }
+
+  /* Esconde o botão "+" de adicionar linha */
+  [aria-label="Adicionar habilidade"],
+  [aria-label="Adicionar linha"],
+  [aria-label="Nova linha"],
+  [aria-label*="Remover"],
+  [aria-label*="Editar"],
+  [aria-label*="Alternar"],
+  [aria-label*="Exportar"] {
+    display: none !important;
+  }
+
+  /* Remove sombras e ajusta backgrounds */
+  main {
+    box-shadow: none !important;
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  /* Garante que o accordion de Anotações fique visível se tiver conteúdo */
+  section {
+    break-inside: avoid;
+  }
+}

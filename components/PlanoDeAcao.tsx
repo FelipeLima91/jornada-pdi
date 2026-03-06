@@ -134,17 +134,16 @@ export function PlanoDeAcao() {
               <th className="text-left px-4 py-3 font-semibold text-muted-foreground border-b border-r border-border w-[25%]">
                 Prazo
               </th>
-              <th className="text-left px-4 py-3 font-semibold text-muted-foreground border-b border-r border-border w-[30%]">
+              <th className="text-left px-4 py-3 font-semibold text-muted-foreground border-b border-border w-[35%]">
                 Como sei que me desenvolvi
               </th>
-              <th className="px-2 py-3 border-b border-border w-[5%]" />
             </tr>
           </thead>
           <tbody>
             {linhas.length === 0 && (
               <tr>
                 <td
-                  colSpan={4}
+                  colSpan={3}
                   className="text-center py-8 text-muted-foreground"
                 >
                   Nenhum plano de ação adicionado. Clique em &quot;+ Adicionar
@@ -179,46 +178,46 @@ export function PlanoDeAcao() {
                         }
                       />
                     </td>
-                    <td className="px-3 py-2 border-r border-border">
-                      <input
-                        value={editDraft.indicador}
-                        onChange={(e) =>
-                          setEditDraft((d) => ({
-                            ...d,
-                            indicador: e.target.value,
-                          }))
-                        }
-                        onKeyDown={handleKeyDown}
-                        placeholder="Indicador de sucesso..."
-                        className="w-full px-2 py-1.5 text-sm bg-background border border-input outline-none focus:border-primary transition-colors"
-                      />
-                    </td>
-                    <td className="px-2 py-2">
-                      <div className="flex items-center gap-1">
-                        <button
-                          onClick={saveEdit}
-                          className="p-1.5 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
-                          aria-label="Salvar"
-                          title="Salvar"
-                        >
-                          <Check size={16} />
-                        </button>
-                        <button
-                          onClick={() => requestRemove(linha.id)}
-                          className="p-1.5 text-destructive hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                          aria-label="Remover linha"
-                          title="Remover"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                        <button
-                          onClick={cancelEdit}
-                          className="p-1.5 text-muted-foreground hover:bg-muted transition-colors"
-                          aria-label="Cancelar"
-                          title="Cancelar"
-                        >
-                          <X size={16} />
-                        </button>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={editDraft.indicador}
+                          onChange={(e) =>
+                            setEditDraft((d) => ({
+                              ...d,
+                              indicador: e.target.value,
+                            }))
+                          }
+                          onKeyDown={handleKeyDown}
+                          placeholder="Indicador de sucesso..."
+                          className="flex-1 px-2 py-1.5 text-sm bg-background border border-input outline-none focus:border-primary transition-colors"
+                        />
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            onClick={saveEdit}
+                            className="p-1.5 text-green-600 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+                            aria-label="Salvar"
+                            title="Salvar"
+                          >
+                            <Check size={16} />
+                          </button>
+                          <button
+                            onClick={() => requestRemove(linha.id)}
+                            className="p-1.5 text-destructive hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                            aria-label="Remover linha"
+                            title="Remover"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="p-1.5 text-muted-foreground hover:bg-muted transition-colors"
+                            aria-label="Cancelar"
+                            title="Cancelar"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </>
@@ -240,22 +239,24 @@ export function PlanoDeAcao() {
                           </span>
                         )}
                     </td>
-                    <td className="px-4 py-3 border-r border-border">
-                      {linha.indicador || (
-                        <span className="text-muted-foreground italic">
-                          —
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-between">
+                        <span>
+                          {linha.indicador || (
+                            <span className="text-muted-foreground italic">
+                              —
+                            </span>
+                          )}
                         </span>
-                      )}
-                    </td>
-                    <td className="px-2 py-3">
-                      <button
-                        onClick={() => startEdit(linha)}
-                        className="p-1.5 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all"
-                        aria-label="Editar linha"
-                        title="Editar"
-                      >
-                        <Pen size={16} />
-                      </button>
+                        <button
+                          onClick={() => startEdit(linha)}
+                          className="p-1.5 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-primary transition-all shrink-0"
+                          aria-label="Editar linha"
+                          title="Editar"
+                        >
+                          <Pen size={16} />
+                        </button>
+                      </div>
                     </td>
                   </>
                 )}
