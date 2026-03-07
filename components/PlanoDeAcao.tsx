@@ -1,23 +1,23 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Pen, Trash2, Plus, Check, X } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { DatePicker } from "./ui/date-picker";
+import { ConfirmModal } from "./ui/ConfirmModal";
+import { STORAGE_KEYS } from "../lib/constants";
 
 interface Linha {
-  id: number;
+  id: string;
   acao: string;
   estimativa: string;
   indicador: string;
 }
 
-let nextId = 1;
-
 export function PlanoDeAcao() {
-  const [linhas, setLinhas] = useLocalStorage<Linha[]>("pdi-plano-acao", []);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [linhas, setLinhas] = useLocalStorage<Linha[]>(STORAGE_KEYS.PLANO_ACAO, []);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<Omit<Linha, "id">>({
     acao: "",
     estimativa: "",
@@ -25,20 +25,14 @@ export function PlanoDeAcao() {
   });
   const [modalOpen, setModalOpen] = useState(false);
   const [pendingRemove, setPendingRemove] = useState<{
-    id: number;
+    id: string;
     linha: Linha;
     index: number;
   } | null>(null);
 
-  // Sync nextId with existing data
-  if (linhas.length > 0) {
-    const maxId = Math.max(...linhas.map((l) => l.id));
-    if (maxId >= nextId) nextId = maxId + 1;
-  }
-
   const addLinha = () => {
     const nova: Linha = {
-      id: nextId++,
+      id: crypto.randomUUID(),
       acao: "",
       estimativa: "",
       indicador: "",
@@ -77,7 +71,7 @@ export function PlanoDeAcao() {
     setEditingId(null);
   };
 
-  const requestRemove = (id: number) => {
+  const requestRemove = (id: string) => {
     const index = linhas.findIndex((l) => l.id === id);
     const linha = linhas[index];
     if (!linha) return;
@@ -274,38 +268,24 @@ export function PlanoDeAcao() {
         Adicionar linha
       </button>
 
-      {/* Modal de Confirmação */}
-      {modalOpen && pendingRemove && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card text-card-foreground border border-border p-6 shadow-lg w-full max-w-sm flex flex-col gap-4">
-            <h4 className="text-lg font-semibold">Confirmar exclusão</h4>
-            <p className="text-sm text-muted-foreground">
-              Tem certeza que deseja remover o plano{" "}
-              <strong className="text-foreground">
-                &quot;{pendingRemove.linha.acao || "sem título"}&quot;
-              </strong>
-              ?
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => {
-                  setModalOpen(false);
-                  setPendingRemove(null);
-                }}
-                className="px-4 py-2 text-sm border border-border hover:bg-accent transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmRemove}
-                className="px-4 py-2 text-sm bg-destructive text-white hover:bg-destructive/90 transition-colors"
-              >
-                Remover
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        open={modalOpen && !!pendingRemove}
+        title="Confirmar exclusão"
+        message={
+          <>
+            Tem certeza que deseja remover o plano{" "}
+            <strong className="text-foreground">
+              &quot;{pendingRemove?.linha.acao || "sem título"}&quot;
+            </strong>
+            ?
+          </>
+        }
+        onConfirm={confirmRemove}
+        onCancel={() => {
+          setModalOpen(false);
+          setPendingRemove(null);
+        }}
+      />
     </div>
   );
 }

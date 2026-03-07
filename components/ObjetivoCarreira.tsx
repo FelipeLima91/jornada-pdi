@@ -1,15 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Pen } from "lucide-react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { STORAGE_KEYS } from "../lib/constants";
 
-interface ObjetivoCarreiraProps {
-  initialText?: string;
-  className?: string;
-}
+const DEFAULT_TEXT = "Escreva aqui seu objetivo para este ciclo...";
 
-export function ObjetivoCarreira({ initialText = "Escreva aqui seu objetivo para este ciclo...", className = "" }: ObjetivoCarreiraProps) {
+export function ObjetivoCarreira() {
   const [isEditing, setIsEditing] = useState(false);
-  const [text, setText] = useLocalStorage("pdi-objetivo", initialText);
+  const [text, setText] = useLocalStorage(STORAGE_KEYS.OBJETIVO, DEFAULT_TEXT);
+  const [textBeforeEdit, setTextBeforeEdit] = useState(DEFAULT_TEXT);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -19,10 +18,15 @@ export function ObjetivoCarreira({ initialText = "Escreva aqui seu objetivo para
     }
   }, [isEditing]);
 
+  const startEditing = () => {
+    setTextBeforeEdit(text);
+    setIsEditing(true);
+  };
+
   const handleBlur = () => {
     setIsEditing(false);
     if (!text.trim()) {
-      setText(initialText);
+      setText(DEFAULT_TEXT);
     }
   };
 
@@ -32,13 +36,13 @@ export function ObjetivoCarreira({ initialText = "Escreva aqui seu objetivo para
       handleBlur();
     }
     if (e.key === "Escape") {
-      setText(initialText);
+      setText(textBeforeEdit);
       setIsEditing(false);
     }
   };
 
   return (
-    <div className={`flex flex-col gap-0 w-full max-w-2xl ${className}`}>
+    <div className="flex flex-col gap-0 w-full max-w-2xl">
       {/* Label acima do card */}
       <div className="bg-primary px-5 py-2">
         <span className="text-xs font-bold uppercase tracking-widest text-primary-foreground">
@@ -63,7 +67,7 @@ export function ObjetivoCarreira({ initialText = "Escreva aqui seu objetivo para
         ) : (
           <div 
             className="w-full h-full text-base leading-relaxed cursor-pointer pr-10 whitespace-pre-wrap text-zinc-900 dark:text-zinc-50"
-            onClick={() => setIsEditing(true)}
+            onClick={startEditing}
           >
             {text}
           </div>
@@ -71,7 +75,7 @@ export function ObjetivoCarreira({ initialText = "Escreva aqui seu objetivo para
 
         {!isEditing && (
           <button 
-            onClick={() => setIsEditing(true)}
+            onClick={startEditing}
             className="absolute top-4 right-4 text-primary/60 hover:text-primary transition-colors p-2 bg-primary/20 hover:bg-primary/30 opacity-0 group-hover:opacity-100"
             aria-label="Editar Objetivo"
             title="Editar"

@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Moon, Sun, Download, FileText, Printer } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Moon, Sun, Download, FileText, Printer, Info, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { cn } from "../lib/utils";
+import { STORAGE_KEYS } from "../lib/constants";
 
 function getPdiData() {
   const getStorage = (key: string) => {
@@ -13,63 +15,86 @@ function getPdiData() {
   };
 
   return {
-    titulo: getStorage("pdi-titulo") || "Meu Plano de Desenvolvimento",
-    objetivo: getStorage("pdi-objetivo") || "Não preenchido",
-    pot: (getStorage("pdi-hab-potencializar") || []) as string[],
-    apr: (getStorage("pdi-hab-aprender") || []) as string[],
-    planoDocs: (getStorage("pdi-plano-acao") || []) as { acao?: string; estimativa?: string; indicador?: string }[],
-    anotacoes: getStorage("pdi-anotacoes") || "Nenhuma anotação",
+    titulo: getStorage(STORAGE_KEYS.TITULO) || "Meu Plano de Desenvolvimento",
+    objetivo: getStorage(STORAGE_KEYS.OBJETIVO) || "Não preenchido",
+    pot: (getStorage(STORAGE_KEYS.HAB_POTENCIALIZAR) || []) as string[],
+    apr: (getStorage(STORAGE_KEYS.HAB_APRENDER) || []) as string[],
+    planoDocs: (getStorage(STORAGE_KEYS.PLANO_ACAO) || []) as { acao?: string; estimativa?: string; indicador?: string }[],
+    anotacoes: getStorage(STORAGE_KEYS.ANOTACOES) || "Nenhuma anotação",
   };
 }
 
 function buildTxtContent(data: ReturnType<typeof getPdiData>) {
   const { titulo, objetivo, pot, apr, planoDocs, anotacoes } = data;
-  let txt = `=================================================\n`;
-  txt += `       PLANO DE DESENVOLVIMENTO INDIVIDUAL\n`;
-  txt += `=================================================\n\n`;
-  txt += `NOME / TÍTULO:\n${titulo}\n\n`;
-  txt += `-------------------------------------------------\n`;
-  txt += `OBJETIVO DE CARREIRA:\n${objetivo}\n\n`;
-  txt += `-------------------------------------------------\n`;
 
-  txt += `HABILIDADES A POTENCIALIZAR (Já Existem):\n`;
-  if (pot.length === 0) txt += `- Nenhuma habilidade cadastrada.\n`;
-  pot.forEach((h) => txt += `- ${h}\n`);
-  txt += `\n`;
+  const potLines = pot.length === 0
+    ? ["- Nenhuma habilidade cadastrada."]
+    : pot.map((h) => `- ${h}`);
 
-  txt += `HABILIDADES A APRENDER (Próximo Passo):\n`;
-  if (apr.length === 0) txt += `- Nenhuma habilidade cadastrada.\n`;
-  apr.forEach((h) => txt += `- ${h}\n`);
-  txt += `\n`;
+  const aprLines = apr.length === 0
+    ? ["- Nenhuma habilidade cadastrada."]
+    : apr.map((h) => `- ${h}`);
 
-  txt += `-------------------------------------------------\n`;
-  txt += `PLANO DE AÇÃO:\n\n`;
-  if (planoDocs.length === 0) {
-    txt += `Nenhum plano de ação cadastrado.\n\n`;
-  } else {
-    planoDocs.forEach((linha, idx) => {
-      txt += `Ação ${idx + 1}: ${linha.acao || "Sem ação descrita"}\n`;
-      const dataFmt = linha.estimativa ? format(new Date(linha.estimativa + "T00:00:00"), "dd/MM/yyyy") : "Sem prazo";
-      txt += `Prazo: ${dataFmt}\n`;
-      txt += `Indicador de Sucesso: ${linha.indicador || "-"}\n\n`;
-    });
-  }
+  const planoLines = planoDocs.length === 0
+    ? ["Nenhum plano de ação cadastrado.", ""]
+    : planoDocs.flatMap((linha, idx) => {
+        const dataFmt = linha.estimativa
+          ? format(new Date(linha.estimativa + "T00:00:00"), "dd/MM/yyyy")
+          : "Sem prazo";
+        return [
+          `Ação ${idx + 1}: ${linha.acao || "Sem ação descrita"}`,
+          `Prazo: ${dataFmt}`,
+          `Indicador de Sucesso: ${linha.indicador || "-"}`,
+          "",
+        ];
+      });
 
-  txt += `-------------------------------------------------\n`;
-  txt += `ANOTAÇÕES LIVRES:\n${anotacoes}\n\n`;
-  txt += `=================================================\n`;
-  txt += `Exportado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}\n`;
+  const lines = [
+    "=================================================",
+    "       PLANO DE DESENVOLVIMENTO INDIVIDUAL",
+    "=================================================",
+    "",
+    "NOME / TÍTULO:",
+    titulo,
+    "",
+    "-------------------------------------------------",
+    "OBJETIVO DE CARREIRA:",
+    objetivo,
+    "",
+    "-------------------------------------------------",
+    "HABILIDADES A POTENCIALIZAR (Já Existem):",
+    ...potLines,
+    "",
+    "HABILIDADES A APRENDER (Próximo Passo):",
+    ...aprLines,
+    "",
+    "-------------------------------------------------",
+    "PLANO DE AÇÃO:",
+    "",
+    ...planoLines,
+    "-------------------------------------------------",
+    "ANOTAÇÕES LIVRES:",
+    anotacoes,
+    "",
+    "=================================================",
+    `Exportado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`,
+  ];
 
-  return txt;
+  return lines.join("\n");
 }
 
-export function Topbar() {
+interface TopbarProps {
+  isInfoOpen: boolean;
+  onToggleInfo: () => void;
+}
+
+export function Topbar({ isInfoOpen, onToggleInfo }: TopbarProps) {
   const [isDark, setIsDark] = useState(false);
   const [popoverOpen, setPopoverOpen] = useState(false);
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
-      const saved = localStorage.getItem("theme");
+      const saved = localStorage.getItem(STORAGE_KEYS.THEME);
       if (saved === "dark") {
         document.documentElement.classList.add("dark");
         setIsDark(true);
@@ -77,7 +102,6 @@ export function Topbar() {
         document.documentElement.classList.remove("dark");
         setIsDark(false);
       } else {
-        // Sem preferência salva, lê o estado atual
         setIsDark(document.documentElement.classList.contains("dark"));
       }
     });
@@ -88,11 +112,11 @@ export function Topbar() {
     const html = document.documentElement;
     if (html.classList.contains("dark")) {
       html.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      localStorage.setItem(STORAGE_KEYS.THEME, "light");
       setIsDark(false);
     } else {
       html.classList.add("dark");
-      localStorage.setItem("theme", "dark");
+      localStorage.setItem(STORAGE_KEYS.THEME, "dark");
       setIsDark(true);
     }
   };
@@ -106,9 +130,7 @@ export function Topbar() {
       const link = document.createElement("a");
       link.href = url;
       link.download = `PDI_${data.titulo.replace(/\s+/g, "_")}.txt`;
-      document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
       URL.revokeObjectURL(url);
       setPopoverOpen(false);
       toast.success("PDI exportado em TXT!");
@@ -120,15 +142,12 @@ export function Topbar() {
 
   const exportPDF = () => {
     setPopoverOpen(false);
-    // Força modo claro para impressão
     const html = document.documentElement;
     const wasDark = html.classList.contains("dark");
     if (wasDark) html.classList.remove("dark");
 
-    // Pequeno delay para o browser aplicar o repaint antes de imprimir
     requestAnimationFrame(() => {
       window.print();
-      // Restaura o tema escuro se estava ativo
       if (wasDark) html.classList.add("dark");
     });
   };
@@ -138,7 +157,13 @@ export function Topbar() {
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
         <PopoverTrigger asChild>
           <button
-            className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-amber-100 text-amber-900 border border-amber-200 hover:bg-amber-200 hover:border-amber-300 dark:bg-amber-900/30 dark:text-amber-100 dark:border-amber-800 dark:hover:bg-amber-900/50 transition-colors"
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 text-sm font-medium",
+              "bg-amber-100 text-amber-900 border border-amber-200",
+              "hover:bg-amber-200 hover:border-amber-300",
+              "dark:bg-amber-900/30 dark:text-amber-100 dark:border-amber-800 dark:hover:bg-amber-900/50",
+              "transition-colors"
+            )}
             aria-label="Exportar PDI"
           >
             <Download size={16} />
@@ -164,8 +189,30 @@ export function Topbar() {
       </Popover>
 
       <button
+        onClick={onToggleInfo}
+        className={cn(
+          "flex items-center gap-1 px-2 py-2",
+          "text-zinc-600 dark:text-zinc-300",
+          "bg-zinc-100 dark:bg-zinc-800 border border-border",
+          "hover:bg-zinc-200 dark:hover:bg-zinc-700",
+          "transition-colors"
+        )}
+        aria-label={isInfoOpen ? "Ocultar informações" : "Mostrar informações"}
+        title={isInfoOpen ? "Ocultar informações" : "Mostrar informações"}
+      >
+        <Info size={16} />
+        {isInfoOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+      </button>
+
+      <button
         onClick={toggleTheme}
-        className="flex items-center justify-center p-2 text-zinc-600 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 border border-border hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+        className={cn(
+          "flex items-center justify-center p-2",
+          "text-zinc-600 dark:text-zinc-300",
+          "bg-zinc-100 dark:bg-zinc-800 border border-border",
+          "hover:bg-zinc-200 dark:hover:bg-zinc-700",
+          "transition-colors"
+        )}
         aria-label="Alternar Tema Claro/Escuro"
         title="Alternar Tema"
       >

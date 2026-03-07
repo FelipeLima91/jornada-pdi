@@ -1,7 +1,9 @@
-import React, { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Plus, X } from "lucide-react";
 import { toast } from "sonner";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { ConfirmModal } from "./ui/ConfirmModal";
+import { STORAGE_KEYS } from "../lib/constants";
 
 const amberTones = [
   "bg-amber-200 border-amber-300 text-amber-900",
@@ -17,8 +19,8 @@ function getTagTone(index: number) {
 }
 
 export function HabilidadesFundamentais() {
-  const [potencializar, setPotencializar] = useLocalStorage<string[]>("pdi-hab-potencializar", []);
-  const [aprender, setAprender] = useLocalStorage<string[]>("pdi-hab-aprender", []);
+  const [potencializar, setPotencializar] = useLocalStorage<string[]>(STORAGE_KEYS.HAB_POTENCIALIZAR, []);
+  const [aprender, setAprender] = useLocalStorage<string[]>(STORAGE_KEYS.HAB_APRENDER, []);
   const [inputPot, setInputPot] = useState("");
   const [inputApr, setInputApr] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
@@ -35,8 +37,7 @@ export function HabilidadesFundamentais() {
       setPotencializar((prev) => [...prev, inputPot.trim()]);
       setInputPot("");
       inputPotRef.current?.focus();
-    }
-    if (list === "aprender" && inputApr.trim()) {
+    } else if (list === "aprender" && inputApr.trim()) {
       setAprender((prev) => [...prev, inputApr.trim()]);
       setInputApr("");
       inputAprRef.current?.focus();
@@ -93,17 +94,16 @@ export function HabilidadesFundamentais() {
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Coluna 1 */}
+        {/* Coluna 1 — Potencializar */}
         <div className="flex flex-col gap-3 border border-border p-5">
           <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
             Já existem e precisam ser potencializadas
           </span>
 
-          {/* Tags ACIMA do input */}
           <div className="flex flex-wrap gap-2 min-h-[32px]">
             {potencializar.map((tag, i) => (
               <span
-                key={`pot-${i}`}
+                key={`pot-${tag}-${i}`}
                 className={`group/tag inline-flex items-center gap-1 px-3 py-1 text-sm font-medium border ${getTagTone(i)}`}
               >
                 {tag}
@@ -137,17 +137,16 @@ export function HabilidadesFundamentais() {
           </div>
         </div>
 
-        {/* Coluna 2 */}
+        {/* Coluna 2 — Aprender */}
         <div className="flex flex-col gap-3 border border-border p-5">
           <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
             Preciso aprender antes do próximo passo
           </span>
 
-          {/* Tags ACIMA do input */}
           <div className="flex flex-wrap gap-2 min-h-[32px]">
             {aprender.map((tag, i) => (
               <span
-                key={`apr-${i}`}
+                key={`apr-${tag}-${i}`}
                 className={`group/tag inline-flex items-center gap-1 px-3 py-1 text-sm font-medium border ${getTagTone(i + 3)}`}
               >
                 {tag}
@@ -182,38 +181,24 @@ export function HabilidadesFundamentais() {
         </div>
       </div>
 
-      {/* Modal de Confirmação */}
-      {modalOpen && pendingRemove && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-card text-card-foreground border border-border p-6 shadow-lg w-full max-w-sm flex flex-col gap-4">
-            <h4 className="text-lg font-semibold">Confirmar exclusão</h4>
-            <p className="text-sm text-muted-foreground">
-              Tem certeza que deseja remover{" "}
-              <strong className="text-foreground">
-                &quot;{pendingRemove.value}&quot;
-              </strong>
-              ?
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => {
-                  setModalOpen(false);
-                  setPendingRemove(null);
-                }}
-                className="px-4 py-2 text-sm border border-border hover:bg-accent transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmRemove}
-                className="px-4 py-2 text-sm bg-destructive text-white hover:bg-destructive/90 transition-colors"
-              >
-                Remover
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        open={modalOpen && !!pendingRemove}
+        title="Confirmar exclusão"
+        message={
+          <>
+            Tem certeza que deseja remover{" "}
+            <strong className="text-foreground">
+              &quot;{pendingRemove?.value}&quot;
+            </strong>
+            ?
+          </>
+        }
+        onConfirm={confirmRemove}
+        onCancel={() => {
+          setModalOpen(false);
+          setPendingRemove(null);
+        }}
+      />
     </div>
   );
 }

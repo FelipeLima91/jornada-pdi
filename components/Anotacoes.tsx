@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { ChevronDown, Pen } from "lucide-react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { STORAGE_KEYS } from "../lib/constants";
 
 export function Anotacoes() {
   const [open, setOpen] = useState(false);
-  const [text, setText] = useLocalStorage("pdi-anotacoes", "");
+  const [text, setText] = useLocalStorage(STORAGE_KEYS.ANOTACOES, "");
   const [isEditing, setIsEditing] = useState(false);
 
   return (
