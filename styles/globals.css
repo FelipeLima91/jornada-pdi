@@ -86,6 +86,21 @@
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    color-scheme: dark;
+  }
+
+  input,
+  textarea,
+  select {
+    color: var(--foreground) !important;
+    -webkit-text-fill-color: var(--foreground) !important;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted-foreground, #999) !important;
+    -webkit-text-fill-color: var(--muted-foreground, #999) !important;
+    opacity: 1;
   }
 }
 
@@ -135,6 +150,21 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* ===== Mobile: Remove padding lateral e vertical ===== */
+@media (max-width: 640px) {
+  /* Wrapper externo da página */
+  .mobile-compact {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 12px !important;
+  }
+
+  /* Main content */
+  .mobile-compact-main {
+    padding: 16px 12px !important;
   }
 }
 
