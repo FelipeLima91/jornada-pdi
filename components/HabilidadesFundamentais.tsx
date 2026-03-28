@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { ConfirmModal } from "./ui/ConfirmModal";
 import { STORAGE_KEYS } from "../lib/constants";
+import { trackEvent, clarityTag } from "../lib/clarity";
 
 const amberTones = [
   "bg-amber-200 border-amber-300 text-amber-900",
@@ -37,10 +38,14 @@ export function HabilidadesFundamentais() {
       setPotencializar((prev) => [...prev, inputPot.trim()]);
       setInputPot("");
       inputPotRef.current?.focus();
+      trackEvent("add_habilidade");
+      clarityTag("tipo_habilidade", "potencializar");
     } else if (list === "aprender" && inputApr.trim()) {
       setAprender((prev) => [...prev, inputApr.trim()]);
       setInputApr("");
       inputAprRef.current?.focus();
+      trackEvent("add_habilidade");
+      clarityTag("tipo_habilidade", "aprender");
     }
   };
 
@@ -62,6 +67,8 @@ export function HabilidadesFundamentais() {
     setter((prev) => prev.filter((_, i) => i !== index));
     setModalOpen(false);
     setPendingRemove(null);
+    trackEvent("remove_habilidade");
+    clarityTag("tipo_habilidade", list);
 
     toast.success(`"${value}" removido`, {
       action: {

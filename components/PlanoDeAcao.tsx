@@ -7,6 +7,7 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 import { DatePicker } from "./ui/date-picker";
 import { ConfirmModal } from "./ui/ConfirmModal";
 import { STORAGE_KEYS } from "../lib/constants";
+import { trackEvent } from "../lib/clarity";
 
 interface Linha {
   id: string;
@@ -40,6 +41,7 @@ export function PlanoDeAcao() {
     setLinhas((prev) => [...prev, nova]);
     setEditingId(nova.id);
     setEditDraft({ acao: "", estimativa: "", indicador: "" });
+    trackEvent("add_acao");
   };
 
   const startEdit = (linha: Linha) => {
@@ -61,6 +63,7 @@ export function PlanoDeAcao() {
       )
     );
     setEditingId(null);
+    trackEvent("edit_acao");
   };
 
   const cancelEdit = () => {
@@ -87,6 +90,7 @@ export function PlanoDeAcao() {
     setEditingId(null);
     setModalOpen(false);
     setPendingRemove(null);
+    trackEvent("remove_acao");
 
     toast.success(`Plano "${linha.acao || "sem título"}" removido`, {
       action: {

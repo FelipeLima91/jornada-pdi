@@ -8,6 +8,7 @@ import { PlanoDeAcao } from "../components/PlanoDeAcao";
 import { Anotacoes } from "../components/Anotacoes";
 import { Topbar } from "../components/Topbar";
 import { STORAGE_KEYS } from "../lib/constants";
+import { trackEvent, clarityTag } from "../lib/clarity";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,6 +32,8 @@ export default function Home() {
     setIsInfoOpen((prev) => {
       const next = !prev;
       localStorage.setItem(STORAGE_KEYS.INFO_OPEN, String(next));
+      trackEvent("toggle_info");
+      clarityTag("info_panel", next ? "open" : "closed");
       return next;
     });
   };

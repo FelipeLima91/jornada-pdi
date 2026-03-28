@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { cn } from "../lib/utils";
 import { STORAGE_KEYS } from "../lib/constants";
+import { trackEvent, clarityTag } from "../lib/clarity";
 
 function getPdiData() {
   const getStorage = (key: string) => {
@@ -114,11 +115,14 @@ export function Topbar({ isInfoOpen, onToggleInfo }: TopbarProps) {
       html.classList.remove("dark");
       localStorage.setItem(STORAGE_KEYS.THEME, "light");
       setIsDark(false);
+      clarityTag("theme", "light");
     } else {
       html.classList.add("dark");
       localStorage.setItem(STORAGE_KEYS.THEME, "dark");
       setIsDark(true);
+      clarityTag("theme", "dark");
     }
+    trackEvent("toggle_theme");
   };
 
   const exportTXT = () => {
@@ -134,6 +138,7 @@ export function Topbar({ isInfoOpen, onToggleInfo }: TopbarProps) {
       URL.revokeObjectURL(url);
       setPopoverOpen(false);
       toast.success("PDI exportado em TXT!");
+      trackEvent("export_txt");
     } catch (e) {
       console.error(e);
       toast.error("Erro ao exportar TXT.");
@@ -142,6 +147,7 @@ export function Topbar({ isInfoOpen, onToggleInfo }: TopbarProps) {
 
   const exportPDF = () => {
     setPopoverOpen(false);
+    trackEvent("export_pdf");
     const html = document.documentElement;
     const wasDark = html.classList.contains("dark");
     if (wasDark) html.classList.remove("dark");

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Pen } from "lucide-react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { STORAGE_KEYS } from "../lib/constants";
+import { trackEvent } from "../lib/clarity";
 
 const DEFAULT_TEXT = "Escreva aqui seu objetivo para este ciclo...";
 
@@ -27,6 +28,8 @@ export function ObjetivoCarreira() {
     setIsEditing(false);
     if (!text.trim()) {
       setText(DEFAULT_TEXT);
+    } else {
+      trackEvent("edit_objetivo");
     }
   };
 

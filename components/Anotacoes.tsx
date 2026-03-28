@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown, Pen } from "lucide-react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { STORAGE_KEYS } from "../lib/constants";
+import { trackEvent } from "../lib/clarity";
 
 export function Anotacoes() {
   const [open, setOpen] = useState(false);
@@ -32,7 +33,7 @@ export function Anotacoes() {
               autoFocus
               value={text}
               onChange={(e) => setText(e.target.value)}
-              onBlur={() => setIsEditing(false)}
+              onBlur={() => { setIsEditing(false); trackEvent("edit_anotacoes"); }}
               placeholder="Escreva suas anotações aqui..."
               className="w-full min-h-[200px] p-4 text-sm leading-relaxed bg-background border border-input outline-none focus:border-primary transition-colors resize-y placeholder:text-muted-foreground"
             />
