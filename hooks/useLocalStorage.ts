@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [value, setValue] = useState<T>(initialValue);
@@ -14,12 +14,12 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
           setValue(JSON.parse(stored));
         }
       } catch {
-        // ignore errors
+        setValue(initialValue);
       }
       hydrated.current = true;
     });
     return () => cancelAnimationFrame(frame);
-  }, [key]);
+  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Save to localStorage on change, but only after hydration
   useEffect(() => {
@@ -27,16 +27,9 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, React.Disp
     try {
       window.localStorage.setItem(key, JSON.stringify(value));
     } catch {
-      // ignore errors
+      // storage unavailable (private mode, quota exceeded, etc.)
     }
   }, [key, value]);
 
-  const setValueWrapped: React.Dispatch<React.SetStateAction<T>> = useCallback(
-    (newValue) => {
-      setValue(newValue);
-    },
-    []
-  );
-
-  return [value, setValueWrapped];
+  return [value, setValue];
 }

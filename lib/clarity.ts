@@ -13,12 +13,12 @@ export function initClarity() {
 
 /** Dispara um evento customizado no Clarity */
 export function trackEvent(name: string) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !initialized) return;
   Clarity.event(name);
 }
 
 /** Define uma tag customizada (key-value) no Clarity */
 export function clarityTag(key: string, value: string) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !initialized) return;
   Clarity.setTag(key, value);
 }
