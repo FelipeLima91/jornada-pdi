@@ -56,11 +56,7 @@ export function PlanoDeAcao() {
   const saveEdit = () => {
     if (editingId === null) return;
     setLinhas((prev) =>
-      prev.map((l) =>
-        l.id === editingId
-          ? { ...l, acao: editDraft.acao, estimativa: editDraft.estimativa, indicador: editDraft.indicador }
-          : l
-      )
+      prev.map((l) => (l.id === editingId ? { ...l, ...editDraft } : l))
     );
     setEditingId(null);
     trackEvent("edit_acao");

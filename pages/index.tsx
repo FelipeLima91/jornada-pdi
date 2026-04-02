@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Github } from "lucide-react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Titulo } from "../components/Titulo";
@@ -7,6 +6,7 @@ import { HabilidadesFundamentais } from "../components/HabilidadesFundamentais";
 import { PlanoDeAcao } from "../components/PlanoDeAcao";
 import { Anotacoes } from "../components/Anotacoes";
 import { Topbar } from "../components/Topbar";
+import { useLocalStorage } from "../hooks/useLocalStorage";
 import { STORAGE_KEYS } from "../lib/constants";
 import { trackEvent, clarityTag } from "../lib/clarity";
 
@@ -21,17 +21,11 @@ const geistMono = Geist_Mono({
 });
 
 export default function Home() {
-  const [isInfoOpen, setIsInfoOpen] = useState(false);
-
-  useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.INFO_OPEN);
-    if (saved === "true") setIsInfoOpen(true);
-  }, []);
+  const [isInfoOpen, setIsInfoOpen] = useLocalStorage(STORAGE_KEYS.INFO_OPEN, false);
 
   const toggleInfo = () => {
     setIsInfoOpen((prev) => {
       const next = !prev;
-      localStorage.setItem(STORAGE_KEYS.INFO_OPEN, String(next));
       trackEvent("toggle_info");
       clarityTag("info_panel", next ? "open" : "closed");
       return next;
@@ -89,29 +83,29 @@ export default function Home() {
         </div>
 
         <main className="mobile-compact-main flex w-full flex-col items-center sm:items-start gap-12 bg-white dark:bg-zinc-800 p-4 sm:p-8 shadow-sm mt-4">
-        <header className="w-full border-b border-border pb-6 flex flex-col gap-1">
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Plano de Desenvolvimento Individual
-          </h1>
-          <Titulo initialText="Nome do Colaborador" />
-        </header>
+          <header className="w-full border-b border-border pb-6 flex flex-col gap-1">
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+              Plano de Desenvolvimento Individual
+            </h1>
+            <Titulo initialText="Nome do Colaborador" />
+          </header>
 
-        <section className="w-full flex flex-col items-center">
-          <ObjetivoCarreira />
-        </section>
+          <section className="w-full flex flex-col items-center">
+            <ObjetivoCarreira />
+          </section>
 
-        <section className="w-full">
-          <HabilidadesFundamentais />
-        </section>
+          <section className="w-full">
+            <HabilidadesFundamentais />
+          </section>
 
-        <section className="w-full">
-          <PlanoDeAcao />
-        </section>
+          <section className="w-full">
+            <PlanoDeAcao />
+          </section>
 
-        <section className="w-full">
-          <Anotacoes />
-        </section>
-      </main>
+          <section className="w-full">
+            <Anotacoes />
+          </section>
+        </main>
 
         <div className="flex justify-end mt-3">
           <a

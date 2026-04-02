@@ -1,88 +1,11 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun, Download, FileText, Printer, Info, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { cn } from "../lib/utils";
 import { STORAGE_KEYS } from "../lib/constants";
 import { trackEvent, clarityTag } from "../lib/clarity";
-
-function getPdiData() {
-  const getStorage = (key: string) => {
-    const val = localStorage.getItem(key);
-    if (!val) return null;
-    try { return JSON.parse(val); }
-    catch { return val; }
-  };
-
-  return {
-    titulo: getStorage(STORAGE_KEYS.TITULO) || "Meu Plano de Desenvolvimento",
-    objetivo: getStorage(STORAGE_KEYS.OBJETIVO) || "Não preenchido",
-    pot: (getStorage(STORAGE_KEYS.HAB_POTENCIALIZAR) || []) as string[],
-    apr: (getStorage(STORAGE_KEYS.HAB_APRENDER) || []) as string[],
-    planoDocs: (getStorage(STORAGE_KEYS.PLANO_ACAO) || []) as { acao?: string; estimativa?: string; indicador?: string }[],
-    anotacoes: getStorage(STORAGE_KEYS.ANOTACOES) || "Nenhuma anotação",
-  };
-}
-
-function buildTxtContent(data: ReturnType<typeof getPdiData>) {
-  const { titulo, objetivo, pot, apr, planoDocs, anotacoes } = data;
-
-  const potLines = pot.length === 0
-    ? ["- Nenhuma habilidade cadastrada."]
-    : pot.map((h) => `- ${h}`);
-
-  const aprLines = apr.length === 0
-    ? ["- Nenhuma habilidade cadastrada."]
-    : apr.map((h) => `- ${h}`);
-
-  const planoLines = planoDocs.length === 0
-    ? ["Nenhum plano de ação cadastrado.", ""]
-    : planoDocs.flatMap((linha, idx) => {
-        const dataFmt = linha.estimativa
-          ? format(new Date(linha.estimativa + "T00:00:00"), "dd/MM/yyyy")
-          : "Sem prazo";
-        return [
-          `Ação ${idx + 1}: ${linha.acao || "Sem ação descrita"}`,
-          `Prazo: ${dataFmt}`,
-          `Indicador de Sucesso: ${linha.indicador || "-"}`,
-          "",
-        ];
-      });
-
-  const lines = [
-    "=================================================",
-    "       PLANO DE DESENVOLVIMENTO INDIVIDUAL",
-    "=================================================",
-    "",
-    "NOME / TÍTULO:",
-    titulo,
-    "",
-    "-------------------------------------------------",
-    "OBJETIVO DE CARREIRA:",
-    objetivo,
-    "",
-    "-------------------------------------------------",
-    "HABILIDADES A POTENCIALIZAR (Já Existem):",
-    ...potLines,
-    "",
-    "HABILIDADES A APRENDER (Próximo Passo):",
-    ...aprLines,
-    "",
-    "-------------------------------------------------",
-    "PLANO DE AÇÃO:",
-    "",
-    ...planoLines,
-    "-------------------------------------------------",
-    "ANOTAÇÕES LIVRES:",
-    anotacoes,
-    "",
-    "=================================================",
-    `Exportado em: ${format(new Date(), "dd/MM/yyyy 'às' HH:mm")}`,
-  ];
-
-  return lines.join("\n");
-}
+import { getPdiData, buildTxtContent } from "../lib/export";
 
 interface TopbarProps {
   isInfoOpen: boolean;
@@ -150,12 +73,15 @@ export function Topbar({ isInfoOpen, onToggleInfo }: TopbarProps) {
     trackEvent("export_pdf");
     const html = document.documentElement;
     const wasDark = html.classList.contains("dark");
-    if (wasDark) html.classList.remove("dark");
-
-    requestAnimationFrame(() => {
-      window.print();
-      if (wasDark) html.classList.add("dark");
-    });
+    if (wasDark) {
+      html.classList.remove("dark");
+      const restoreDark = () => {
+        html.classList.add("dark");
+        window.removeEventListener("afterprint", restoreDark);
+      };
+      window.addEventListener("afterprint", restoreDark);
+    }
+    window.print();
   };
 
   return (
